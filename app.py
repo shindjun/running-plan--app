@@ -40,6 +40,11 @@ recent_distance = st.number_input("최근 레이스 거리 (km, 예: 5 또는 10
 recent_time_min = st.number_input("최근 레이스 타임 (분)", min_value=10.0, max_value=300.0, value=25.0)
 
 # 러닝 데이터 입력
+st.header("2. 러닝 데이터 입력 (모델 정확도 향상을 위해)")
+st.write("과거 러닝 로그를 입력하세요. 형식: 거리, 페이스, 심박수")
+uploaded_file = st.file_uploader("CSV 파일 업로드 (선택)", type="csv")
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
 
 else:
     num_entries = st.number_input("입력할 데이터 개수", min_value=1, max_value=10, value=3)
