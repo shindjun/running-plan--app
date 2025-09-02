@@ -7,23 +7,23 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
 # 페이지 설정
-st.set_page_config(page_title="STEEL RUNNERS-Running Plan App", page_icon="🏃‍♂️", layout="wide")
+st.set_page_config(page_title="STEEL RUNNERS 훈련계획 생성기", page_icon="🏃‍♂️", layout="wide")
 
-st.title("🏃‍♂️ STEEL RUNNERS Running Training Plan Generator")
-st.write("사용자 데이터를 입력해 개인화된 계획을 생성하세요. Zone 2, VO2max, 속도 향상, 예상 레이스 타임 포함!")
+st.title("🏃‍♂️ STEEL RUNNERS 훈련계획 생성기")
+st.write("사용자 데이터를 입력해 개인화된 러닝 훈련 계획을 생성하세요. Zone 2, VO2max, 속도 향상, 예상 레이스 타임 포함!")
 
 # 사이드바
 with st.sidebar:
     st.header("사용법")
-    st.write("1. 기본 정보 입력 (Max HR 추가)")
-    st.write("2. 최근 레이스 데이터 입력 (VO2max/예상 타임용)")
-    st.write("3. 러닝 데이터 입력 (ML 학습용)")
-    st.write("4. 계획 생성!")
+    st.write("1. 기본 정보 입력 (최대 심박수 추가)")
+    st.write("2. 페이스 계산기 사용 (선택)")
+    st.write("3. 최근 레이스 데이터 입력 (VO2max/예상 타임용)")
+    st.write("4. 러닝 데이터 입력 (ML 학습용)")
+    st.write("5. 계획 생성!")
 
 # 사용자 입력
 st.header("1. 기본 정보 입력")
 col1, col2, col3, col4 = st.columns(4)
-
 with col1:
     age = st.number_input("나이", min_value=18, max_value=80, value=30)
 with col2:
@@ -31,31 +31,45 @@ with col2:
 with col3:
     current_pace = st.number_input("현재 페이스 (분/km)", min_value=3.0, max_value=10.0, value=6.0)
 with col4:
-    estimated_max_hr = 220 - age  # 최대 심박수 추정 공식 적용
-    max_hr = st.number_input("Max Heart Rate (bpm)", min_value=140, max_value=220, value=estimated_max_hr)
+    estimated_max_hr = 220 - age  # 최대 심박수 추정 공식
+    max_hr = st.number_input("최대 심박수 (bpm)", min_value=140, max_value=220, value=estimated_max_hr)
+    st.write(f"추정 최대 심박수: {estimated_max_hr} bpm (220 - 나이)")
+
+# 페이스 계산기
+st.header("2. 페이스 계산기 (선택)")
+st.write("러닝 거리와 시간을 입력해 페이스를 계산하세요.")
+col_p1, col_p2, col_p3 = st.columns(3)
+with col_p1:
+    pace_distance = st.number_input("거리 (km)", min_value=1.0, max_value=100.0, value=5.0)
+with col_p2:
+    pace_time_min = st.number_input("시간 (분)", min_value=1.0, max_value=600.0, value=25.0)
+with col_p3:
+    if pace_distance > 0 and pace_time_min > 0:
+        calculated_pace = pace_time_min / pace_distance
+        st.write(f"계산된 페이스: {calculated_pace:.2f} 분/km")
+        if st.button("현재 페이스로 적용"):
+            current_pace = calculated_pace
+            st.success(f"현재 페이스가 {current_pace:.2f} 분/km로 업데이트되었습니다!")
+    else:
+        st.write("페이스 계산을 위해 거리와 시간을 입력하세요.")
 
 # 최근 레이스 입력
-st.header("1.5. 최근 레이스 정보 (VO2max/예상 타임 계산용)")
+st.header("3. 최근 레이스 정보 (VO2max/예상 타임 계산용)")
 recent_distance = st.number_input("최근 레이스 거리 (km, 예: 5 또는 10)", min_value=1.0, max_value=42.0, value=5.0)
 recent_time_min = st.number_input("최근 레이스 타임 (분)", min_value=10.0, max_value=300.0, value=25.0)
 
 # 러닝 데이터 입력
-st.header("2. 러닝 데이터 입력 (모델 정확도 향상을 위해)")
+st.header("4. 러닝 데이터 입력 (모델 정확도 향상을 위해)")
 st.write("과거 러닝 로그를 입력하세요. 형식: 거리, 페이스, 심박수")
-uploaded_file = st.file_uploader("CSV 파일 업로드 (선택)", type="csv")
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
-
-else:
-    num_entries = st.number_input("입력할 데이터 개수", min_value=1, max_value=10, value=3)
-    running_data = []
-    for i in range(num_entries):
-        dist = st.number_input(f"거리 {i+1} (km)", value=5.0)
-        pace = st.number_input(f"페이스 {i+1} (분/km)", value=6.0)
-        heart_rate = st.number_input(f"심박수 {i+1} (bpm)", value=150)
-        running_data.append([dist, pace, heart_rate])
-    if running_data:
-        data = pd.DataFrame(running_data, columns=["distance", "pace", "heart_rate"])
+num_entries = st.number_input("입력할 데이터 개수", min_value=1, max_value=10, value=3)
+running_data = []
+for i in range(num_entries):
+    dist = st.number_input(f"거리 {i+1} (km)", value=5.0)
+    pace = st.number_input(f"페이스 {i+1} (분/km)", value=6.0)
+    heart_rate = st.number_input(f"심박수 {i+1} (bpm)", value=150)
+    running_data.append([dist, pace, heart_rate])
+if running_data:
+    data = pd.DataFrame(running_data, columns=["distance", "pace", "heart_rate"])
 
 # 함수: Zone 2 Pace 계산
 def calculate_zone2_pace(max_hr, current_pace):
@@ -113,8 +127,8 @@ if st.button("모델 학습 및 계획 생성"):
         # Zone 2
         zone2_hr_low, zone2_hr_high, zone2_pace = calculate_zone2_pace(max_hr, current_pace)
         st.subheader("Zone 2 계산")
-        st.write(f"Zone 2 HR: {zone2_hr_low:.0f} - {zone2_hr_high:.0f} bpm")
-        st.write(f"Zone 2 Pace: {zone2_pace:.2f} 분/km")
+        st.write(f"Zone 2 심박수: {zone2_hr_low:.0f} - {zone2_hr_high:.0f} bpm")
+        st.write(f"Zone 2 페이스: {zone2_pace:.2f} 분/km")
 
         # VO2max
         vo2max = estimate_vo2max(recent_distance, recent_time_min, age)
