@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # 페이지 설정
 st.set_page_config(page_title="STEEL RUNNERS-Running Plan App", page_icon="🏃‍♂️", layout="wide")
 
-st.title("🏃‍♂️ Advanced Running Training Plan Generator")
+st.title("🏃‍♂️ STEEL RUNNERS Running Training Plan Generator")
 st.write("사용자 데이터를 입력해 개인화된 계획을 생성하세요. Zone 2, VO2max, 속도 향상, 예상 레이스 타임 포함!")
 
 # 사이드바
