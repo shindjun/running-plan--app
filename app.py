@@ -23,6 +23,7 @@ with st.sidebar:
 # 사용자 입력
 st.header("1. 기본 정보 입력")
 col1, col2, col3, col4 = st.columns(4)
+
 with col1:
     age = st.number_input("나이", min_value=18, max_value=80, value=30)
 with col2:
@@ -30,7 +31,8 @@ with col2:
 with col3:
     current_pace = st.number_input("현재 페이스 (분/km)", min_value=3.0, max_value=10.0, value=6.0)
 with col4:
-    max_hr = st.number_input("Max Heart Rate (bpm)", min_value=140, max_value=220, value=180)
+    estimated_max_hr = 220 - age  # 최대 심박수 추정 공식 적용
+    max_hr = st.number_input("Max Heart Rate (bpm)", min_value=140, max_value=220, value=estimated_max_hr)
 
 # 최근 레이스 입력
 st.header("1.5. 최근 레이스 정보 (VO2max/예상 타임 계산용)")
@@ -38,11 +40,7 @@ recent_distance = st.number_input("최근 레이스 거리 (km, 예: 5 또는 10
 recent_time_min = st.number_input("최근 레이스 타임 (분)", min_value=10.0, max_value=300.0, value=25.0)
 
 # 러닝 데이터 입력
-st.header("2. 러닝 데이터 입력 (모델 정확도 향상을 위해)")
-st.write("과거 러닝 로그를 입력하세요. 형식: 거리, 페이스, 심박수")
-uploaded_file = st.file_uploader("CSV 파일 업로드 (선택)", type="csv")
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
+
 else:
     num_entries = st.number_input("입력할 데이터 개수", min_value=1, max_value=10, value=3)
     running_data = []
